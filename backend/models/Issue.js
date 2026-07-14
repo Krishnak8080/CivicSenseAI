@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const IssueSchema = new mongoose.Schema({
   title: String,
@@ -7,7 +7,7 @@ const IssueSchema = new mongoose.Schema({
   image: String,
   votes: { type: Number, default: 0 },
   resolved: { type: Boolean, default: false },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
 });
 
-module.exports = mongoose.model("Issue", IssueSchema);
+module.exports = mongoose.model('Issue', IssueSchema);

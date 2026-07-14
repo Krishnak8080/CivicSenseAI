@@ -17,10 +17,10 @@ interface LocationAutocompleteInputProps {
   error?: string;
 }
 
-export const LocationAutocompleteInput = ({ 
-  onLocationSelect, 
+export const LocationAutocompleteInput = ({
+  onLocationSelect,
   initialValue = '',
-  error 
+  error,
 }: LocationAutocompleteInputProps) => {
   const [inputValue, setInputValue] = useState(initialValue);
   const [selectedLocation, setSelectedLocation] = useState<LocationData | null>(null);
@@ -33,7 +33,7 @@ export const LocationAutocompleteInput = ({
         const loader = new Loader({
           apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
           version: 'weekly',
-          libraries: ['places']
+          libraries: ['places'],
         });
 
         await loader.load();
@@ -41,24 +41,21 @@ export const LocationAutocompleteInput = ({
         if (!inputRef.current) return;
 
         // Initialize autocomplete with Delhi bias
-        autocompleteRef.current = new google.maps.places.Autocomplete(
-          inputRef.current,
-          {
-            componentRestrictions: { country: 'in' }, // Restrict to India
-            fields: ['formatted_address', 'geometry', 'name', 'place_id'],
-            types: ['geocode', 'establishment'], // Allow both addresses and places
-            bounds: new google.maps.LatLngBounds(
-              new google.maps.LatLng(28.4089, 76.8410), // Delhi SW
-              new google.maps.LatLng(28.8836, 77.3466)  // Delhi NE
-            ),
-            strictBounds: false
-          }
-        );
+        autocompleteRef.current = new google.maps.places.Autocomplete(inputRef.current, {
+          componentRestrictions: { country: 'in' }, // Restrict to India
+          fields: ['formatted_address', 'geometry', 'name', 'place_id'],
+          types: ['geocode', 'establishment'], // Allow both addresses and places
+          bounds: new google.maps.LatLngBounds(
+            new google.maps.LatLng(28.4089, 76.841), // Delhi SW
+            new google.maps.LatLng(28.8836, 77.3466) // Delhi NE
+          ),
+          strictBounds: false,
+        });
 
         // Listen for place selection
         autocompleteRef.current.addListener('place_changed', () => {
           const place = autocompleteRef.current?.getPlace();
-          
+
           if (!place || !place.geometry || !place.geometry.location) {
             console.error('No details available for selected place');
             return;
@@ -69,14 +66,13 @@ export const LocationAutocompleteInput = ({
             formatted_address: place.formatted_address || '',
             latitude: place.geometry.location.lat(),
             longitude: place.geometry.location.lng(),
-            place_id: place.place_id
+            place_id: place.place_id,
           };
 
           setSelectedLocation(locationData);
           setInputValue(place.formatted_address || place.name || '');
           onLocationSelect(locationData);
         });
-
       } catch (error) {
         console.error('Error loading Google Maps:', error);
       }
@@ -95,12 +91,12 @@ export const LocationAutocompleteInput = ({
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude, longitude } = position.coords;
-        
+
         // Reverse geocode to get address
         try {
           const geocoder = new google.maps.Geocoder();
           const result = await geocoder.geocode({
-            location: { lat: latitude, lng: longitude }
+            location: { lat: latitude, lng: longitude },
           });
 
           if (result.results[0]) {
@@ -109,7 +105,7 @@ export const LocationAutocompleteInput = ({
               formatted_address: result.results[0].formatted_address,
               latitude,
               longitude,
-              place_id: result.results[0].place_id
+              place_id: result.results[0].place_id,
             };
 
             setInputValue(result.results[0].formatted_address);
@@ -132,10 +128,10 @@ export const LocationAutocompleteInput = ({
       <label htmlFor="location" className="text-sm font-medium text-[var(--text-secondary)] block">
         Precise Location
       </label>
-      
+
       <div className="relative">
         <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--orange-primary)] z-10" />
-        
+
         <Input
           ref={inputRef}
           id="location"
@@ -158,18 +154,18 @@ export const LocationAutocompleteInput = ({
         </button>
       </div>
 
-      {error && (
-        <p className="text-sm text-red-500 mt-1">{error}</p>
-      )}
+      {error && <p className="text-sm text-red-500 mt-1">{error}</p>}
 
       {selectedLocation && (
         <div className="text-xs text-[var(--text-muted)] mt-2 p-2 bg-[var(--bg-elevated)] rounded-md border border-[var(--border-subtle)]">
           <p className="flex items-center gap-2">
             <MapPin className="w-3 h-3 text-[var(--orange-primary)]" />
-            <span className="font-medium text-white">Selected:</span> {selectedLocation.formatted_address}
+            <span className="font-medium text-white">Selected:</span>{' '}
+            {selectedLocation.formatted_address}
           </p>
           <p className="mt-1">
-            Coordinates: {selectedLocation.latitude.toFixed(6)}, {selectedLocation.longitude.toFixed(6)}
+            Coordinates: {selectedLocation.latitude.toFixed(6)},{' '}
+            {selectedLocation.longitude.toFixed(6)}
           </p>
         </div>
       )}

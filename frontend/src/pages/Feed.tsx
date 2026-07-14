@@ -45,8 +45,14 @@ export default function Feed() {
       })
       .subscribe();
 
+    const handleReportSubmitted = () => {
+      fetchReports();
+    };
+    window.addEventListener('reportSubmitted', handleReportSubmitted);
+
     return () => {
       supabase.removeChannel(subscription);
+      window.removeEventListener('reportSubmitted', handleReportSubmitted);
     };
   }, [user]);
 
@@ -55,7 +61,7 @@ export default function Feed() {
       .from('reports')
       .select('*')
       .order('created_at', { ascending: false });
-      
+
     if (!error && data) {
       setReports(data as Report[]);
     }
@@ -67,10 +73,10 @@ export default function Feed() {
       .from('votes')
       .select('report_id, vote_type')
       .eq('user_id', user.id);
-      
+
     if (data) {
       const votesRecord: Record<string, number> = {};
-      data.forEach(v => {
+      data.forEach((v) => {
         votesRecord[v.report_id] = v.vote_type;
       });
       setUserVotes(votesRecord);
@@ -86,19 +92,24 @@ export default function Feed() {
       if (currentVote === type) {
         // Toggle off the vote
         await supabase.from('votes').delete().match({ user_id: user.id, report_id: reportId });
-        setUserVotes(prev => {
+        setUserVotes((prev) => {
           const next = { ...prev };
           delete next[reportId];
           return next;
         });
       } else if (currentVote === 0) {
         // New vote
-        await supabase.from('votes').insert({ user_id: user.id, report_id: reportId, vote_type: type });
-        setUserVotes(prev => ({ ...prev, [reportId]: type }));
+        await supabase
+          .from('votes')
+          .insert({ user_id: user.id, report_id: reportId, vote_type: type });
+        setUserVotes((prev) => ({ ...prev, [reportId]: type }));
       } else {
         // Change vote type
-        await supabase.from('votes').update({ vote_type: type }).match({ user_id: user.id, report_id: reportId });
-        setUserVotes(prev => ({ ...prev, [reportId]: type }));
+        await supabase
+          .from('votes')
+          .update({ vote_type: type })
+          .match({ user_id: user.id, report_id: reportId });
+        setUserVotes((prev) => ({ ...prev, [reportId]: type }));
       }
     } catch (error) {
       console.error('Error voting', error);
@@ -121,18 +132,19 @@ export default function Feed() {
     <>
       <AnimatePresence>
         {showOverlay && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.8, ease: "easeInOut" }}
+            transition={{ duration: 0.8, ease: 'easeInOut' }}
             className="fixed inset-0 bg-black z-[100] flex items-center justify-center"
           >
-            <motion.div 
+            <motion.div
               animate={{ opacity: [0.5, 1, 0.5] }}
               transition={{ duration: 1.5, repeat: Infinity }}
               className="text-white text-3xl md:text-5xl font-black tracking-[0.4em] text-center"
             >
-              LOCATING<br/>
+              LOCATING
+              <br />
               <span className="text-[var(--orange-primary)]">COMMUNITY</span>
             </motion.div>
           </motion.div>
@@ -141,20 +153,18 @@ export default function Feed() {
 
       <div className="flex h-screen w-full pt-[72px] overflow-hidden bg-[var(--bg-primary)]">
         {/* Left side: Scrollable Social Feed */}
-        <motion.div 
+        <motion.div
           initial={{ x: justLoggedIn ? -50 : 0, opacity: justLoggedIn ? 0 : 1 }}
           animate={{ x: feedVisible ? 0 : -50, opacity: feedVisible ? 1 : 0 }}
-          transition={{ duration: 0.7, ease: "easeOut" }}
+          transition={{ duration: 0.7, ease: 'easeOut' }}
           className="w-full lg:w-[45%] xl:w-[40%] h-full flex flex-col border-r border-[var(--border-subtle)] relative z-10 bg-[var(--bg-secondary)] shadow-2xl"
         >
           <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="mb-6"
-            >
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-6">
               <h2 className="text-2xl font-bold text-white tracking-tight">Local Issues Feed</h2>
-              <p className="text-[var(--text-secondary)] mt-1">Review and prioritize reports in your community.</p>
+              <p className="text-[var(--text-secondary)] mt-1">
+                Review and prioritize reports in your community.
+              </p>
             </motion.div>
 
             {reports.length === 0 ? (
@@ -164,11 +174,13 @@ export default function Feed() {
               </div>
             ) : (
               <div className="space-y-2">
-                {reports.map(report => (
-                  <ReportCard 
-                    key={report.id} 
-                    report={report} 
-                    ref={el => { reportRefs.current[report.id] = el; }}
+                {reports.map((report) => (
+                  <ReportCard
+                    key={report.id}
+                    report={report}
+                    ref={(el) => {
+                      reportRefs.current[report.id] = el;
+                    }}
                     onUpvote={(id) => handleVote(id, 1)}
                     onDownvote={(id) => handleVote(id, -1)}
                     voteType={userVotes[report.id] || 0}
@@ -180,10 +192,10 @@ export default function Feed() {
         </motion.div>
 
         {/* Right side: Sticky Interactive Map */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: justLoggedIn ? 0 : 1, scale: justLoggedIn ? 0.95 : 1 }}
           animate={{ opacity: mapVisible ? 1 : 0, scale: mapVisible ? 1 : 0.95 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
           className="hidden lg:block lg:w-[55%] xl:w-[60%] h-full relative"
         >
           {/* Always mount map to prevent loading flicker during animation, just control visibility via framer motion */}

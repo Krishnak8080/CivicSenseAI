@@ -9,24 +9,28 @@ interface MapSectionProps {
 
 const containerStyle = {
   width: '100%',
-  height: '100%'
+  height: '100%',
 };
 
 // Default to New Delhi (Central location)
 const defaultCenter = {
   lat: 28.6139,
-  lng: 77.2090
+  lng: 77.209,
 };
 
 const darkMapStyles = [
-  { elementType: "geometry", stylers: [{ color: "#0a0a0a" }] },
-  { elementType: "labels.text.stroke", stylers: [{ color: "#000000" }] },
-  { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
-  { featureType: "administrative", elementType: "geometry.stroke", stylers: [{ color: "#2a2a2a" }] },
-  { featureType: "road", elementType: "geometry", stylers: [{ color: "#1a1a1a" }] },
-  { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#212121" }] },
-  { featureType: "water", elementType: "geometry", stylers: [{ color: "#000000" }] },
-  { featureType: "poi.park", elementType: "geometry", stylers: [{ color: "#0d1f0d" }] }
+  { elementType: 'geometry', stylers: [{ color: '#0a0a0a' }] },
+  { elementType: 'labels.text.stroke', stylers: [{ color: '#000000' }] },
+  { elementType: 'labels.text.fill', stylers: [{ color: '#746855' }] },
+  {
+    featureType: 'administrative',
+    elementType: 'geometry.stroke',
+    stylers: [{ color: '#2a2a2a' }],
+  },
+  { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#1a1a1a' }] },
+  { featureType: 'road', elementType: 'geometry.stroke', stylers: [{ color: '#212121' }] },
+  { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#000000' }] },
+  { featureType: 'poi.park', elementType: 'geometry', stylers: [{ color: '#0d1f0d' }] },
 ];
 
 const libraries: any = ['places'];
@@ -35,25 +39,29 @@ export function MapSection({ reports, onMarkerClick }: MapSectionProps) {
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
-    libraries
+    libraries,
   });
 
   const [selectedMarker, setSelectedMarker] = useState<string | null>(null);
 
-  const center = reports.length > 0 && !isNaN(Number(reports[0].latitude)) && !isNaN(Number(reports[0].longitude))
-    ? { lat: Number(reports[0].latitude), lng: Number(reports[0].longitude) }
-    : defaultCenter;
+  const center =
+    reports.length > 0 &&
+    !isNaN(Number(reports[0].latitude)) &&
+    !isNaN(Number(reports[0].longitude))
+      ? { lat: Number(reports[0].latitude), lng: Number(reports[0].longitude) }
+      : defaultCenter;
 
-  if (!isLoaded) return (
-    <div className="w-full h-full bg-[var(--bg-secondary)] animate-pulse flex items-center justify-center text-[var(--text-muted)]">
-      Loading Map Data...
-    </div>
-  );
+  if (!isLoaded)
+    return (
+      <div className="w-full h-full bg-[var(--bg-secondary)] animate-pulse flex items-center justify-center text-[var(--text-muted)]">
+        Loading Map Data...
+      </div>
+    );
 
   // Priority-based marker icons
   const getMarkerIcon = (priority: string = 'medium') => {
     const baseUrl = '/markers/';
-    
+
     // Safety check: sometimes the window.google maps object isn't fully ready synchronously,
     // but inside GoogleMap it should be.
     if (!window.google) return undefined;
@@ -61,7 +69,7 @@ export function MapSection({ reports, onMarkerClick }: MapSectionProps) {
     return {
       url: `${baseUrl}pin-${priority.toLowerCase()}.svg`,
       scaledSize: new window.google.maps.Size(40, 40),
-      anchor: new window.google.maps.Point(20, 40)
+      anchor: new window.google.maps.Point(20, 40),
     };
   };
 
@@ -70,11 +78,11 @@ export function MapSection({ reports, onMarkerClick }: MapSectionProps) {
       mapContainerStyle={containerStyle}
       center={center}
       zoom={12}
-      options={{ 
+      options={{
         styles: darkMapStyles,
-        disableDefaultUI: true, 
+        disableDefaultUI: true,
         zoomControl: true,
-        backgroundColor: '#0a0a0a'
+        backgroundColor: '#0a0a0a',
       }}
     >
       {reports.map((report) => {
@@ -100,17 +108,18 @@ export function MapSection({ reports, onMarkerClick }: MapSectionProps) {
       {selectedMarker && (
         <InfoWindow
           position={{
-            lat: Number(reports.find(r => r.id === selectedMarker)?.latitude) || 0,
-            lng: Number(reports.find(r => r.id === selectedMarker)?.longitude) || 0
+            lat: Number(reports.find((r) => r.id === selectedMarker)?.latitude) || 0,
+            lng: Number(reports.find((r) => r.id === selectedMarker)?.longitude) || 0,
           }}
           onCloseClick={() => setSelectedMarker(null)}
         >
           <div className="p-2 bg-black text-white rounded-lg shadow-lg border border-[var(--border-subtle)]">
             <h3 className="font-bold text-sm text-[var(--orange-primary)]">
-              {reports.find(r => r.id === selectedMarker)?.title}
+              {reports.find((r) => r.id === selectedMarker)?.title}
             </h3>
             <p className="text-xs text-[var(--text-secondary)] mt-1">
-              {reports.find(r => r.id === selectedMarker)?.formatted_address || reports.find(r => r.id === selectedMarker)?.location}
+              {reports.find((r) => r.id === selectedMarker)?.formatted_address ||
+                reports.find((r) => r.id === selectedMarker)?.location}
             </p>
           </div>
         </InfoWindow>

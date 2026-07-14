@@ -22,8 +22,19 @@ create table reports (
   priority text default 'medium' check (priority in ('low', 'medium', 'high')),
   status text default 'pending' check (status in ('pending', 'resolved')),
   votes_count integer default 0,
+  photo_validation_status text check (photo_validation_status in ('verified', 'flagged', 'rejected', 'pending')),
+  photo_validation_confidence integer check (photo_validation_confidence >= 0 and photo_validation_confidence <= 100),
+  photo_validation_warnings text[],
+  photo_validation_data jsonb,
+  requires_manual_review boolean default false,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
+
+-- Index for filtering flagged reports
+create index if not exists idx_reports_requires_review 
+  on reports(requires_manual_review) 
+  where requires_manual_review = true;
+
 
 -- Create votes table to track upvotes
 create table votes (

@@ -8,7 +8,7 @@ This guide contains everything you need to set up, configure, and run the Civic 
 
 Before doing anything, ensure your system has the following installed:
 
-1. **Node.js**: (Version 18 or higher is required). 
+1. **Node.js**: (Version 18 or higher is required).
    - Download it from [Node.js Official Website](https://nodejs.org/).
    - To verify installation, open a terminal and run: `node -v`
 2. **Git**: Required for cloning the repository.
@@ -49,6 +49,7 @@ npm install
 For security reasons, `.env` files are ignored by git. You must manually recreate them to connect the application to Supabase, Google Maps, and Gemini AI.
 
 ### Frontend Environment Setup
+
 1. Navigate to the frontend directory:
    ```bash
    cd frontend
@@ -57,18 +58,19 @@ For security reasons, `.env` files are ignored by git. You must manually recreat
    ```env
    # Your Supabase Project URL
    VITE_SUPABASE_URL="https://your-project-url.supabase.co"
-   
+
    # Your Supabase Public Anon Key
    VITE_SUPABASE_ANON_KEY="your-anon-key"
-   
+
    # Your Google Maps API Key (Must have Maps JS, Places, and Geocoding APIs enabled)
    VITE_GOOGLE_MAPS_API_KEY="your-google-maps-key"
-   
+
    # Point the frontend to the local backend during development
-   VITE_API_URL="http://localhost:8000" 
+   VITE_API_URL="http://localhost:8000"
    ```
 
 ### Backend Environment Setup
+
 1. Navigate to the backend directory:
    ```bash
    cd ../backend
@@ -77,10 +79,10 @@ For security reasons, `.env` files are ignored by git. You must manually recreat
    ```env
    # Your Google Gemini AI API Key
    GEMINI_API_KEY="your-gemini-api-key"
-   
+
    # Your Supabase Project URL
    SUPABASE_URL="https://your-project-url.supabase.co"
-   
+
    # Your Supabase Service Role Key (DO NOT share this publicly)
    SUPABASE_SERVICE_KEY="your-service-role-key"
    ```
@@ -133,16 +135,19 @@ You must also create a storage bucket named `reports` and make it public so user
 Now that dependencies are installed and environment variables are set, you can run the entire stack with a single command.
 
 Navigate back to the root `Civic_Sense` directory:
+
 ```bash
 cd ..
 ```
 
 Run the application:
+
 ```bash
 npm start
 ```
 
 ### What happens now?
+
 - The **Frontend** (React + Vite) will compile and become accessible at: `http://localhost:5173`
 - The **Backend** (Node.js + Express) will boot up and listen for API requests at: `http://localhost:8000`
 
@@ -153,6 +158,7 @@ npm start
 When you are ready to take the project live:
 
 **Backend (Render):**
+
 1. Create a new Web Service on Render and point it to the repository.
 2. Set Root Directory to `backend`.
 3. Build Command: `npm install`
@@ -160,6 +166,7 @@ When you are ready to take the project live:
 5. Add the backend Environment Variables.
 
 **Frontend (Vercel):**
+
 1. Create a new Project on Vercel and import the repository.
 2. Set the Root Directory to `frontend`.
 3. Vercel will automatically detect Vite.
